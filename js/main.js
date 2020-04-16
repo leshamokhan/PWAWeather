@@ -1,0 +1,200 @@
+const urlPlace = 'https://api.ipdata.co/?api-key=test';
+
+const urlWeatherNowDay = 'https://api.weatherapi.com/v1/current.json?key=9146a513ed4545b4800125347200204&q=';
+
+const urlWeatherNextDay = 'https://api.weatherapi.com/v1/forecast.json?key=9146a513ed4545b4800125347200204&q=';
+
+
+
+
+async function getPlace() {
+    let response = await fetch(urlPlace);
+    if (response.ok) {
+        let jsonData = response.json();
+        return jsonData;
+    } else {
+        alert('Error: ' + response.status);
+    }
+}
+
+
+async function getWeatherNowDay(place) {
+    let response = await fetch(urlWeatherNowDay + place);
+    if (response.ok) {
+        let jsonData = response.json();
+        console.log(jsonData);
+        return jsonData;
+    } else {
+        alert('Error: ' + response.status);
+    }
+}
+
+
+async function getWeatherNextDay(place) {
+    let response = await fetch(urlWeatherNextDay + place + '&days=6');
+    if (response.ok) {
+        let jsonData = response.json();
+        return jsonData;
+    } else {
+        alert('Error: ' + response.status);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+function renderCity(data) {
+    let cityName = document.querySelector('.current__city');
+    cityName.innerHTML = data.city;
+}
+
+
+function renderCurrentTemperature(data) {
+    let tmp = data.current.temp_c;
+    let currentTmp = document.querySelector('.current__temperature');
+    currentTmp.innerHTML = tmp + '˚';
+}
+
+function renderCurrentDescription(data) {
+    let tmp = data.current.condition.text;
+    let description = document.querySelector('.current__description');
+    description.innerHTML = tmp;
+}
+
+function renderDetailsItem(className, value) {
+    let container = document.querySelector(`.${className}`).querySelector('.details__value');
+    container.innerHTML = value;
+}
+
+
+
+
+
+
+
+function details(data) {
+    renderDetailsItem('feelslike', data.current.feelslike_c + '˚');
+    renderDetailsItem('humidity', data.current.humidity + ' %');
+    renderDetailsItem('wind', data.current.wind_kph + ' kp/h');
+    renderDetailsItem('uvindex', data.current.uv);
+
+}
+
+
+
+
+function render(data) {
+
+    renderCity(data);
+
+    getWeatherNowDay(data.city).then(dataWeather => {
+        currentDataWeather = dataWeather;
+
+        renderCurrentTemperature(dataWeather);
+        renderCurrentDescription(dataWeather);
+        details(dataWeather);
+    })
+
+
+    getWeatherNextDay(data.city).then(dataWeather => {
+        currentDataWeather = dataWeather;
+        renderForecast(dataWeather);
+    })
+}
+
+
+
+
+
+var days = [
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday'
+];
+
+
+function renderForecast(data) {
+
+    let forecastDataContainer = document.querySelector('.forecast');
+    let forecasts = '';
+
+    for (let i = 1; i < 6; i++) {
+        var png = 'https://' + data.forecast.forecastday[i].day.condition.icon;
+
+        var date = data.forecast.forecastday[i].date;
+        var day = new Date(date);
+        var n = day.getDay();
+
+        var temp = data.forecast.forecastday[i].day.avgtemp_c + '˚';
+
+        let template = `<div class="forecast__item">
+        <div class="forecast__time">${days[n]}</div>
+        <div class="forecast__icon"><img src="${png}" class="imgNow${i}"></div>
+        <div class="forecast__temperature">${temp}</div>
+        </div>`;
+
+        forecasts += template;
+    }
+    forecastDataContainer.innerHTML = forecasts;
+
+    document.querySelector('.loading').style.display = 'none';
+    document.querySelector('.weather').style.display = 'block';
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function start() {
+    document.querySelector('.loading').style.display = 'block';
+    document.querySelector('.weather').style.display = 'none';
+
+    getPlace().then(data => {
+        currentData = data;
+        render(data);
+    })
+}
+
+
+
+start();

@@ -34,13 +34,12 @@ async function getWeatherNextDay(place) {
     let response = await fetch(urlWeatherNextDay + place + '&days=6');
     if (response.ok) {
         let jsonData = response.json();
+        console.log(jsonData);
         return jsonData;
     } else {
         alert('Error: ' + response.status);
     }
 }
-
-
 
 
 
@@ -60,7 +59,7 @@ function renderCity(data) {
 function renderCurrentTemperature(data) {
     let tmp = data.current.temp_c;
     let currentTmp = document.querySelector('.current__temperature');
-    currentTmp.innerHTML = tmp + '˚';
+    currentTmp.innerHTML = Math.round(tmp) + '˚';
 }
 
 function renderCurrentDescription(data) {
@@ -81,9 +80,9 @@ function renderDetailsItem(className, value) {
 
 
 function details(data) {
-    renderDetailsItem('feelslike', data.current.feelslike_c + '˚');
+    renderDetailsItem('feelslike', Math.round(data.current.feelslike_c) + '˚');
     renderDetailsItem('humidity', data.current.humidity + ' %');
-    renderDetailsItem('wind', data.current.wind_kph + ' kp/h');
+    renderDetailsItem('wind', Math.round(data.current.wind_kph) + ' kp/h');
     renderDetailsItem('uvindex', data.current.uv);
 
 }
@@ -97,12 +96,10 @@ function render(data) {
 
     getWeatherNowDay(data.city).then(dataWeather => {
         currentDataWeather = dataWeather;
-
         renderCurrentTemperature(dataWeather);
         renderCurrentDescription(dataWeather);
         details(dataWeather);
     })
-
 
     getWeatherNextDay(data.city).then(dataWeather => {
         currentDataWeather = dataWeather;
@@ -137,7 +134,7 @@ function renderForecast(data) {
         var day = new Date(date);
         var n = day.getDay();
 
-        var temp = data.forecast.forecastday[i].day.avgtemp_c + '˚';
+        var temp = Math.round(data.forecast.forecastday[i].day.avgtemp_c) + '˚';
 
         let template = `<div class="forecast__item">
         <div class="forecast__time">${days[n]}</div>
@@ -147,13 +144,39 @@ function renderForecast(data) {
 
         forecasts += template;
     }
+
     forecastDataContainer.innerHTML = forecasts;
+
+    renderDayOrNight(data);
 
     document.querySelector('.loading').style.display = 'none';
     document.querySelector('.weather').style.display = 'block';
 }
 
 
+function renderDayOrNight(data) {
+    let attrName = '';
+
+    let timeSunsire = data.forecast.forecastday[0].astro.sunrise;
+    let timeSunset = data.forecast.forecastday[0].astro.sunset;
+
+    var h1 = Number.parseInt(timeSunsire[0] + '' + timeSunsire[1]);
+    var m1 = Number.parseInt(timeSunsire[3] + '' + timeSunsire[4]);
+
+    var h2 = Number.parseInt(timeSunset[0] + '' + timeSunset[1]) + 12;
+
+    var date = new Date();
+    var hour = date.getHours();
+    var minute = date.getMinutes();
+
+    if ((h1 < hour) && (m1 < minute) && (hour < h2)) {
+        attrName = 'day';
+    } else {
+        attrName = 'night';
+    }
+
+    document.documentElement.setAttribute('data-theme', attrName);
+}
 
 
 

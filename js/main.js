@@ -5,8 +5,6 @@ const urlWeatherNowDay = 'https://api.weatherapi.com/v1/current.json?key=9146a51
 const urlWeatherNextDay = 'https://api.weatherapi.com/v1/forecast.json?key=9146a513ed4545b4800125347200204&q=';
 
 
-
-
 async function getPlace() {
     let response = await fetch(urlPlace);
     if (response.ok) {
@@ -42,63 +40,25 @@ async function getWeatherNextDay(place) {
 }
 
 
-
-
-
-
-
-
-
-
-function renderCity(data) {
-    let cityName = document.querySelector('.current__city');
-    cityName.innerHTML = data.city;
-}
-
-
-function renderCurrentTemperature(data) {
-    let tmp = data.current.temp_c;
-    let currentTmp = document.querySelector('.current__temperature');
-    currentTmp.innerHTML = Math.round(tmp) + '˚';
-}
-
-function renderCurrentDescription(data) {
-    let tmp = data.current.condition.text;
-    let description = document.querySelector('.current__description');
-    description.innerHTML = tmp;
-}
-
 function renderDetailsItem(className, value) {
     let container = document.querySelector(`.${className}`).querySelector('.details__value');
     container.innerHTML = value;
 }
 
 
-
-
-
-
-
-function details(data) {
-    renderDetailsItem('feelslike', Math.round(data.current.feelslike_c) + '˚');
-    renderDetailsItem('humidity', data.current.humidity + ' %');
-    renderDetailsItem('wind', Math.round(data.current.wind_kph) + ' kp/h');
-    renderDetailsItem('uvindex', data.current.uv);
-
-}
-
-
-
-
 function render(data) {
 
-    renderCity(data);
+    renderDetailsItem('current__city', data.city);
 
     getWeatherNowDay(data.city).then(dataWeather => {
         currentDataWeather = dataWeather;
-        renderCurrentTemperature(dataWeather);
-        renderCurrentDescription(dataWeather);
-        details(dataWeather);
+
+        renderDetailsItem('current__temperature', Math.round(data.current.temp_c) + '˚');
+        renderDetailsItem('current__description', data.current.condition.text);
+        renderDetailsItem('feelslike', Math.round(data.current.feelslike_c) + '˚');
+        renderDetailsItem('humidity', data.current.humidity + ' %');
+        renderDetailsItem('wind', Math.round(data.current.wind_kph) + ' kp/h');
+        renderDetailsItem('uvindex', data.current.uv);
     })
 
     getWeatherNextDay(data.city).then(dataWeather => {
@@ -106,10 +66,6 @@ function render(data) {
         renderForecast(dataWeather);
     })
 }
-
-
-
-
 
 var days = [
     'Sunday',
@@ -177,32 +133,6 @@ function renderDayOrNight(data) {
 
     document.documentElement.setAttribute('data-theme', attrName);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
